@@ -108,3 +108,68 @@ del paso 10 haría falta:
    que tampoco existen en Wine.
 3. Recomendación práctica: **no seguir por aquí**; usa la app no oficial de este
    repo, que consume el mismo endpoint (`web.whatsapp.com`) que la app de Windows.
+
+## Actualización (12-nov-2026): sí existe ALPC, y WhatsApp arranca casi entero
+
+Los puntos anteriores quedaron desfasados. Resumen de lo conseguido con el fork
+[`ZhymabekRoman/wine-ultimate`](https://github.com/ZhymabekRoman/wine-ultimate)
+(Wine 11.10 con ALPC real, `coremessaging` propio e identidad de paquete por
+variables de entorno); detalle en [`docs/ALPC.md`](ALPC.md).
+
+Secuencia verificada con `WINEPREFIX=~/.local/share/whatsapp-wine/prefix`:
+
+1. `CONNECT_ALPC_PORT` / `ACCEPT_ALPC_CONN` y puerto
+   `\BaseNamedObjects\CoreMessagingRegistrar-32:00000000-…` → **el handshake de
+   CoreMessaging funciona**.
+2. Sustituyendo el `CoreMessagingXP.dll` del WinAppSDK por el `coremessaging.dll`
+   del fork (que implementa `GetDispatcherQueueForCurrentThread`, alias
+   `WinUIGetDispatcherQueueForCurrentThread`, `WinUICreateDispatcherQueueController`
+   y `CoreUIEnableCrossProcessPrototyping`) se superan los `unimplemented function`.
+3. Identidad de framework por entorno
+   (`WINE_PACKAGE_FULL_NAME=Microsoft.WindowsAppRuntime.2_2.6.5.0_x64__8wekyb3d8bbwe`,
+   `WINE_PACKAGE_PATH=…/runtime`) → desaparece el `XamlParseException` de
+   `ms-appx:///Microsoft.UI.Xaml/Themes/themeresources.xaml`.
+4. Se crea la ventana `Windows.UI.Core.CoreWindow` y arrancan VoIP
+   (`wa_media_api.c`), `MediaFilesService`, `WebLifecycleController` y el canal
+   de notificaciones push.
+
+### Bloqueos actuales (ya no son ALPC ni DWM genérico)
+
+- **IID privado de composición** `{5e03ab98-c7e0-4449-8518-568d62e9b396}`
+  solicitado al factory de `Windows.UI.Composition.Compositor` (lo usa
+  `dcompi.dll`, la composición *lifted* del WinAppSDK 2.6). Wine responde
+  `E_NOINTERFACE` → `RoFailFastWithErrorContextInternal2(E_FAIL)`.
+- Con un alias experimental a `ICompositorDesktopInterop`, XAML sigue y pide
+  `RtlFindActivationContextSectionString(ACTIVATABLE_CLASS,
+  "Windows.UI.Composition.Compositor")`; Wine devuelve
+  `STATUS_SXS_KEY_NOT_FOUND` → `0x800736B7`. Wine no expone clases WinRT en el
+  activation context.
+
+### Herramientas y artefactos que quedan en la máquina
+
+| Ruta | Contenido |
+|---|---|
+| `~/.local/share/whatsapp-wine/wine-alpc/` | Wine 11.10 + ALPC instalado (`bin/wine`) |
+| `~/.local/share/whatsapp-wine/prefix/` | prefix win64 con la app y su log (`applog.txt`) |
+| `~/.local/share/whatsapp-wine/app/` | MSIX desempaquetado + DLLs MSVC `*_APP` + `CoreMessagingXP.dll` del fork |
+| `~/.local/share/whatsapp-wine/runtime/` | runtime WinAppSDK 2.6.5 (identidad de framework) |
+| `~/.local/share/whatsapp-wine/build/wine-ultimate-ultimate/` | fuente parcheada + build (5 GB) |
+| `~/.local/mingw/` | toolchain mingw-w64 rootless (1.7 GB) |
+| `/tmp/alpc/` | venv (pefile/capstone), logs de las ejecuciones y MSIX de VCLibs |
+
+Reproducir una ejecución:
+
+```bash
+BASE=~/.local/share/whatsapp-wine
+export WINEPREFIX="$BASE/prefix" WINEARCH=win64
+export WINE_PACKAGE_FULL_NAME="Microsoft.WindowsAppRuntime.2_2.6.5.0_x64__8wekyb3d8bbwe"
+export WINE_PACKAGE_FAMILY_NAME="Microsoft.WindowsAppRuntime.2_8wekyb3d8bbwe"
+export WINE_PACKAGE_AUMID="Microsoft.WindowsAppRuntime.2_8wekyb3d8bbwe!App"
+export WINE_PACKAGE_PATH="$BASE/runtime"
+cd "$BASE/app" && "$BASE/wine-alpc/bin/wine" WhatsApp.Root.exe
+```
+
+El parche IL de `docs/wine-experiment/patch_boot_il.py` sigue aplicado; la app
+llega hasta el window-proc de XAML con él. Probar el DLL prístino (sin parche)
+es la vía más prometedora para que el bootstrapper real registre las clases
+WinRT, pero requiere volver a descargar el MSIX (~300 MB).
