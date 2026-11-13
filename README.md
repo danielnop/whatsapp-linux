@@ -16,7 +16,7 @@ arrastar-y-soltar. Sin cuentas, sin servidores intermedios: llega directo a
 ### Opción 1 · AppImage (recomendada)
 
 Descarga el último `WhatsApp-Linux-x64.AppImage` de
-[Releases](https://github.com/YOUR_USER/whatsapp-linux/releases) y hazlo ejecutable:
+[Releases](https://github.com/danielnop/whatsapp-linux/releases) y hazlo ejecutable:
 
 ```bash
 chmod +x WhatsApp-Linux-x64.AppImage
@@ -32,7 +32,7 @@ Instalación “limpia” para el usuario (mete icono en el menú + handler `wha
 ### Opción 2 · Arch / CachyOS
 
 ```bash
-git clone https://github.com/YOUR_USER/whatsapp-linux.git
+git clone https://github.com/danielnop/whatsapp-linux.git
 cd whatsapp-linux
 makepkg -sfci
 ```

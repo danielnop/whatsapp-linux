@@ -5,11 +5,11 @@ pkgver=1.0.0
 pkgrel=1
 pkgdesc="Cliente de escritorio de WhatsApp para Linux (no oficial, basado en WhatsApp Web)"
 arch=('x86_64')
-url="https://github.com/YOUR_USER/whatsapp-linux"
+url="https://github.com/danielnop/whatsapp-linux"
 license=('MIT')
 depends=('gtk3' 'nss' 'libnotify' 'libxss' 'libxtst' 'xdg-utils')
 makedepends=('nodejs' 'npm' 'librsvg' 'imagemagick')
-source=("$pkgname-$pkgver.tar.gz::https://github.com/YOUR_USER/whatsapp-linux/archive/refs/tags/v$pkgver.tar.gz")
+source=("$pkgname-$pkgver.tar.gz::https://github.com/danielnop/whatsapp-linux/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')
 
 build() {

@@ -39,7 +39,7 @@ Añade `.github/dependabot.yml` con `package-ecosystem: npm` y
 ## 4. Publicación
 
 ```bash
-git remote add origin git@github.com:YOUR_USER/whatsapp-linux.git
+git remote add origin git@github.com:danielnop/whatsapp-linux.git
 git push -u origin main
 git tag v1.0.0 && git push --tags   # dispara el build del workflow
 ```
