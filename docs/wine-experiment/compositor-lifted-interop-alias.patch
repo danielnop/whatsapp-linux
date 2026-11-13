@@ -1,0 +1,46 @@
+--- a/dlls/windows.ui.composition/compositor.c
++++ b/dlls/windows.ui.composition/compositor.c
+@@ -56,6 +56,11 @@
+     return CONTAINING_RECORD( iface, struct compositor, ICompositor_iface );
+ }
+ 
++/* Private interop IID requested by the lifted (WinAppSDK) composition bridge.
++ * The vtable is the same WinRT interop surface as ICompositorDesktopInterop. */
++static const GUID IID_lifted_compositor_desktop_interop =
++    {0x5e03ab98, 0xc7e0, 0x4449, {0x85, 0x18, 0x56, 0x8d, 0x62, 0xe9, 0xb3, 0x96}};
++
+ static HRESULT WINAPI compositor_QueryInterface( struct ICompositor *iface, REFIID iid, void **out )
+ {
+     struct compositor *impl = impl_from_ICompositor( iface );
+@@ -83,8 +88,11 @@
+         IUnknown_AddRef( (IUnknown *)*out );
+         return S_OK;
+     }
+-    if (IsEqualGUID( iid, &IID_ICompositorDesktopInterop ))
++    if (IsEqualGUID( iid, &IID_ICompositorDesktopInterop )
++        || IsEqualGUID( iid, &IID_lifted_compositor_desktop_interop ))
+     {
++        if (IsEqualGUID( iid, &IID_lifted_compositor_desktop_interop ))
++            FIXME( "aliasing lifted interop IID to ICompositorDesktopInterop\n" );
+         *out = &impl->ICompositorDesktopInterop_iface;
+         IUnknown_AddRef( (IUnknown *)*out );
+         return S_OK;
+@@ -698,13 +706,16 @@
+     /* Activatable class: requesting an instance interface activates a new Compositor. */
+     if (IsEqualGUID( iid, &IID_ICompositor )
+         || IsEqualGUID( iid, &IID_ICompositorInterop )
+-        || IsEqualGUID( iid, &IID_ICompositorDesktopInterop ))
++        || IsEqualGUID( iid, &IID_ICompositorDesktopInterop )
++        || IsEqualGUID( iid, &IID_lifted_compositor_desktop_interop ))
+     {
+         struct compositor *compositor;
++        REFIID target = IsEqualGUID( iid, &IID_lifted_compositor_desktop_interop )
++            ? &IID_ICompositorDesktopInterop : iid;
+         HRESULT hr;
+ 
+         if (!(compositor = compositor_create() )) return E_OUTOFMEMORY;
+-        hr = ICompositor_QueryInterface( &compositor->ICompositor_iface, iid, out );
++        hr = ICompositor_QueryInterface( &compositor->ICompositor_iface, target, out );
+         IInspectable_Release( (IInspectable *)&compositor->ICompositor_iface ); /* drop creation ref */
+         return hr;
+     }
