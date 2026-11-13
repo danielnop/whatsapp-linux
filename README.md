@@ -1,35 +1,39 @@
 # WhatsApp Linux
 
-Cliente de escritorio **no oficial** de WhatsApp para Linux. Envuelve WhatsApp Web en un
-navegador de escritorio (Electron) para que tengas: ventana propia, icono en la bandeja
-del sistema, notificaciones nativas, contador de mensajes sin leer, sesión persistente y
-arrastar-y-soltar. Sin cuentas, sin servidores intermedios: llega directo a
-`web.whatsapp.com` con el cifrado de WhatsApp (las llaves se guardan en tu disco).
+<p align="center">
+  <b>🇬🇧 English</b> · <a href="README.es.md">🇪🇸 Español</a>
+</p>
 
-> ⚠️ No afiliado a Meta. WhatsApp es marca de Meta Platforms, Inc.
+**Unofficial** WhatsApp desktop client for Linux. It wraps WhatsApp Web in a desktop
+browser (Electron) so you get: its own window, system tray icon, native notifications,
+unread counter, persistent session and drag & drop. No accounts, no middle servers: it
+connects directly to `web.whatsapp.com` with WhatsApp's encryption (the keys stay on
+your disk).
 
-![estado](https://img.shields.io/badge/estado-funcionando-brightgreen)
-![licencia](https://img.shields.io/badge/licencia-MIT-blue)
+> ⚠️ Not affiliated with Meta. WhatsApp is a trademark of Meta Platforms, Inc.
 
-## Instalación
+![status](https://img.shields.io/badge/status-working-brightgreen)
+![license](https://img.shields.io/badge/license-MIT-blue)
 
-### Opción 1 · AppImage (recomendada)
+## Installation
 
-Descarga el último `WhatsApp-Linux-x64.AppImage` de
-[Releases](https://github.com/danielnop/whatsapp-linux/releases) y hazlo ejecutable:
+### Option 1 · AppImage (recommended)
+
+Download the latest `WhatsApp-Linux-x64.AppImage` from
+[Releases](https://github.com/danielnop/whatsapp-linux/releases) and make it executable:
 
 ```bash
 chmod +x WhatsApp-Linux-x64.AppImage
 ./WhatsApp-Linux-x64.AppImage
 ```
 
-Instalación “limpia” para el usuario (mete icono en el menú + handler `whatsapp://`):
+Clean per-user install (adds a menu icon + `whatsapp://` handler):
 
 ```bash
 ./install.sh WhatsApp-Linux-x64.AppImage
 ```
 
-### Opción 2 · Arch / CachyOS
+### Option 2 · Arch / CachyOS
 
 ```bash
 git clone https://github.com/danielnop/whatsapp-linux.git
@@ -37,18 +41,18 @@ cd whatsapp-linux
 makepkg -sfci
 ```
 
-### Opción 3 · Debian / Ubuntu
+### Option 3 · Debian / Ubuntu
 
-Hardware requerido: Linux x86_64 o Wayland con Drivers de GPU modernos.
-Descarga el `.deb` de la release y `dpkg -i WhatsApp-Linux-amd64.deb`.
+Required hardware: Linux x86_64, or Wayland with modern GPU drivers.
+Download the `.deb` from the release and run `dpkg -i WhatsApp-Linux-amd64.deb`.
 
-## Uso
+## Usage
 
-* Escanea el QR **una sola vez** (se guarda la sesión).
-* Al cerrar la ventana sigue activo en la bandeja → corre para volver.
-* `whatsapp://send?phone=...` y `https://wa.me/…` abren la app.
+* Scan the QR code **once** (the session is saved).
+* Closing the window keeps it running in the tray → launch it again to show it.
+* `whatsapp://send?phone=...` and `https://wa.me/…` open the app.
 * Zoom: `Ctrl +` / `Ctrl -`. DevTools: `Ctrl+Shift+I`.
-* Arranque minimizado: `WA_START_MINIMIZED=1`.
+* Start minimized: `WA_START_MINIMIZED=1`.
 
 ### CLI
 
@@ -56,59 +60,73 @@ Descarga el `.deb` de la release y `dpkg -i WhatsApp-Linux-amd64.deb`.
 WhatsApp-Linux.AppImage --start-minimized
 ```
 
-## ¿Qué pasa con el archivo .exe de Windows?
+## What about the Windows `.exe`?
 
-El instalador de Windows **no funciona en Linux** tal cual. Documentamos el experimento
-completo, con registros y el punto exacto de reinicio (y por qué), en
-[`docs/WINE.md`](docs/WINE.md). Resumen:
+The Windows installer **does not work on Linux** as-is. We documented the whole
+experiment, with logs and the exact restart point (and why), in
+[`docs/WINE.md`](docs/WINE.md) and [`docs/ALPC.md`](docs/ALPC.md). Summary:
 
-| Paso | Resultado |
+| Step | Result |
 |---|---|
-| Obtener el `.msixbundle` oficial | ✅ |
-| Extraerlo y ejecutar `WhatsApp.Root.exe` bajo Wine 11.21 | ✅ arranca .NET 8 |
-| Registrar clases WinRT del Windows App Runtime (1033 clases) | ✅ |
-| Saltar `DeploymentManager.Initialize` con parche IL (NOP al `call`) | ✅ |
-| Cargar `Microsoft.ui.xaml.dll` + runtime WinAppSDK 2.6.5 | ✅ importado |
-| Activar `Microsoft.UI.Xaml.Application` (WinUI 3) | ❌ `NtCreateWaitCompletionPacket` no implementado |
+| Get the official `.msixbundle` | ✅ |
+| Extract it and run `WhatsApp.Root.exe` under Wine 11.21 | ✅ .NET 8 starts |
+| Register the Windows App Runtime WinRT classes (1,033 classes) | ✅ |
+| Skip `DeploymentManager.Initialize` with an IL patch (NOP the `call`) | ✅ |
+| Load `Microsoft.ui.xaml.dll` + WinAppSDK 2.6.5 runtime | ✅ imported |
+| ALPC / CoreMessaging handshake (`CoreMessagingRegistrar-32`) | ✅ with the `wine-ultimate` fork |
+| WinUI 3 creates `Windows.UI.Core.CoreWindow`, VoIP and push init | ✅ |
+| Finish `Microsoft.UI.Xaml.Window` initialization | ❌ private composition IID + activation-context classes |
 
-**El bloqueo final es estructural**, no un parche más:
+Wine upstream ships ALPC as a 135-line stub (`dlls/ntdll/unix/alpc.c`) that returns
+`STATUS_NOT_IMPLEMENTED` for everything, so the `CoreMessaging` broker cannot start and
+WinUI 3 never gets a dispatcher queue. The
+[`ZhymabekRoman/wine-ultimate`](https://github.com/ZhymabekRoman/wine-ultimate) fork
+(Wine 11.10) implements ALPC, wait completion packets, its own `coremessaging` and
+package identity through `WINE_PACKAGE_*` environment variables. With it, the ALPC
+handshake works and the WinUI 3 window is created.
 
-* `NtCreateWaitCompletionPacket` (ntdll) lo llaman `CoreMessagingXP.dll` / `Microsoft.UI.dll`
-  al crear el CoreMessaging de WinRT. **No existe en Wine upstream** (verificado en el
-  código fuente de `wine/wine` en gitlab.winehq.org: 0 resultados) ni en la build
-  `wine-11.21-staging-tkg` de Kron4ek, ni siquiera en **GE-Proton 11-12** (verificado por
-  binaria en `ntdll.so` y `ntdll.dll`). reimplementarlo requería recompilar ntdll y aún así
-  el siguiente muro es DWM/composición, que WinUI 3 exige para pintar la ventana.
-* El formato MSIX exige identidad de paquete (`APPMODEL_ERROR_NO_PACKAGE` en Wine), y por
-  diseño WinUI 3 + WebView2 no tienen equivalente en Wine hoy.
+The two blockers left are inside the Windows App SDK's *lifted* composition:
 
-La app es **WinUI 3 + WebView2** y espera ser un *paquete MSIX* con identidad de paquete,
-algo que Wine no implementa. Por eso la vía sana es un **cliente real** de Linux (este
-repo), no un «port» del binario de Windows.
+* XAML asks the `Windows.UI.Composition.Compositor` factory for the private IID
+  `{5e03ab98-c7e0-4449-8518-568d62e9b396}` (`dcompi.dll`); Wine answers
+  `E_NOINTERFACE`, which ends in a fail-fast with `E_FAIL`.
+* After aliasing that IID experimentally, XAML queries the activation context for the
+  activatable class `Windows.UI.Composition.Compositor`; Wine returns
+  `STATUS_SXS_KEY_NOT_FOUND` (`0x800736B7`) because it does not expose WinRT classes
+  there.
 
-## Desarrollo
+None of those are ALPC problems anymore: the transport and the broker already work.
+The app is **WinUI 3 + WebView2** and expects to be an *MSIX package* with package
+identity, something Wine does not implement. That is why the sane path is a **real
+Linux client** (this repo) instead of a port of the Windows binary.
+
+## Development
 
 ```bash
 npm install
-npm start          # abre la app
-npm run build:all  # genera AppImage, deb y pacman en dist/
+npm start          # opens the app
+npm run build:all  # builds AppImage, deb and pacman into dist/
 ```
 
-Estructura:
+Structure:
 
 ```
-src/main.js     proceso principal (ventana, tray, permisos, UA)
-src/preload.js  puente seguro (contextIsolation + sandbox)
-assets/         iconos (SVG y PNG)
+src/main.js     main process (window, tray, permissions, UA)
+src/preload.js  secure bridge (contextIsolation + sandbox)
+assets/         icons (SVG and PNG)
 ```
 
-## Seguridad
+## Security
 
 * `nodeIntegration: false`, `contextIsolation: true`, `sandbox: true`.
-* Solo se enlaza a dominios de WhatsApp; el resto abre en el navegador del sistema.
-* Permisos: se autorizan solo notificaciones, cámara, micrófono y portapapeles.
-* No se hacen peticiones a ningún servicio externo aparte de `web.whatsapp.com`.
+* It only binds to WhatsApp domains; everything else opens in the system browser.
+* Permissions: only notifications, camera, microphone and clipboard are granted.
+* No requests are made to any external service other than `web.whatsapp.com`.
 
-## Licencia
+## License
 
-MIT — ver [`LICENSE`](LICENSE). El nombre WhatsApp es de Meta Platforms, Inc.
+MIT — see [`LICENSE`](LICENSE). The name WhatsApp is property of Meta Platforms, Inc.
+
+<p align="center">
+  <b>🇬🇧 English</b> · <a href="README.es.md">🇪🇸 Español</a>
+</p>
