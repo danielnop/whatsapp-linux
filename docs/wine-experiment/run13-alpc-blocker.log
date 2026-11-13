@@ -1,0 +1,25 @@
+0024:fixme:process:GetProcessGroupAffinity (FFFFFFFFFFFFFFFF,000000000019F304,0000000000000000): stub
+0024:fixme:process:GetProcessGroupAffinity (FFFFFFFFFFFFFFFF,000000000019F2A0,0000000000000000): stub
+0024:fixme:seh:WerRegisterRuntimeExceptionModule (L"Z:\\home\\eldani\\.local\\share\\whatsapp-wine\\app\\mscordaccore.dll", 00006FFFFC030000) stub
+0024:fixme:ntdll:NtQuerySystemInformation info_class SYSTEM_PERFORMANCE_INFORMATION
+0024:fixme:win:create_window_handle DPI context 0x22 not implemented
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 0000000100525D88, 34) stub
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 0000000100519DF0, 17) stub
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 00006FFFF98DDBB6, 49) stub
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 00006FFFFA737EEB, 39) stub
+0024:fixme:ntdll:EtwRegisterTraceGuidsW   register trace class {cb18e7b3-f5b0-412f-9f18-5d87fefcd663}
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 00006FFFFA737EAE, 44) stub
+0024:fixme:ntdll:RtlGetCurrentProcessorNumberEx (000000000019DE00) :semi-stub
+0024:fixme:combase:RoGetActivationFactory (L"Microsoft.Windows.AppLifecycle.AppInstance", {4f414b25-8330-5a9b-bbc1-8229d479649d}, 000000000019E9E8): semi-stub
+0024:fixme:ver:GetCurrentPackageFullName (000000000019DFD0 0000000000000000): stub
+0024:fixme:ver:GetCurrentPackageFullName (000000000019E220 0000000000000000): stub
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 0000000100521C30, 38) stub
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 00006FFFF60E785B, 52) stub
+0024:fixme:combase:RoGetActivationFactory (L"Microsoft.UI.Xaml.Application", {4e0d09f5-4358-512c-a987-503b52848e95}, 000000000019EB88): semi-stub
+0024:fixme:ntdll:EtwEventSetInformation (deadbeef, 2, 00006FFFF5627EEB, 39) stub
+0024:fixme:ntdll:EtwRegisterTraceGuidsW   register trace class {cb18e7b3-f5b0-412f-9f18-5d87fefcd663}
+0024:fixme:kernelbase:AppPolicyGetWindowingModel FFFFFFFFFFFFFFFA, 000000000019EBF8
+0024:fixme:alpc:NtAlpcConnectPort 0xff0a78, L"\\BaseNamedObjects\\CoreMessagingRegistrar-32:00000000-0000-0000-0000-000000000000", 0x19e2e8, 0x19e360, 0x20000, (nil), 0x19e200, 0x19e1f0, 0x2a437f0, (nil), (nil) stub!
+0024:err:seh:NtRaiseException Unhandled exception code c0000602 flags 1 addr 0x6ffff4947d62
+0138:fixme:alpc:NtAlpcSendWaitReceivePort 0x1e4, 0, (nil), (nil), 0x2a4fa90, 0x594f7b0, 0xadf6e0, (nil) stub!
+0138:err:seh:NtRaiseException Unhandled exception code e0464645 flags 0 addr 0x6ffff49c5fe7

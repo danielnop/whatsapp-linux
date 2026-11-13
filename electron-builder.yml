@@ -1,0 +1,25 @@
+appId: com.github.whatsapp.linux
+productName: WhatsApp Linux
+directories:
+  output: dist
+  buildResources: assets
+files:
+  - src/**/*
+  - assets/icon.png
+  - package.json
+extraResources:
+  - from: assets
+    to: assets
+linux:
+  category: Network;InstantMessaging
+  icon: assets
+  target:
+    - AppImage
+    - deb
+    - pacman
+artifactName: ${productName}-${version}-${arch}.${ext}
+deb:
+  depends:
+    - libnotify4
+    - libnss3
+    - gnome-keyring

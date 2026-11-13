@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+*.AppImage
+*.deb
+*.pacman
+*.tar.gz
+npm-debug.log*
+.DS_Store
